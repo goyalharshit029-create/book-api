@@ -16,5 +16,5 @@ typing_extensions==4.16.0
 uvicorn==0.51.0
 python-multipart
 email-validator
-passlib
-bcrypt
+passlib==1.7.4
+bcrypt==4.0.1
