@@ -963,3 +963,180 @@ function applyRoleBasedUI() {
 
     }
 }
+
+// ---------- ADMIN ISSUE BOOK ----------
+async function loadIssueBookData() {
+
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    // Only admin can use this
+    if (role !== "admin") {
+        return;
+    }
+
+    const studentSelect = document.getElementById("issueStudent");
+    const bookSelect = document.getElementById("issueBook");
+
+    if (!studentSelect || !bookSelect) {
+        return;
+    }
+
+    // ---------- LOAD STUDENTS ----------
+    const usersResponse = await fetch(
+        API + "/students",
+        {
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        }
+    );
+
+    if (usersResponse.ok) {
+
+        const users = await usersResponse.json();
+
+        studentSelect.innerHTML = `
+        <option value="">
+            Select Student
+        </option>
+    `;
+
+        users.forEach(user => {
+
+            studentSelect.innerHTML += `
+            <option value="${user.id}">
+                ${user.name} - ${user.email}
+            </option>
+        `;
+
+        });
+    }
+
+
+    // ---------- LOAD BOOKS ----------
+    const booksResponse = await fetch(
+        API + "/books?page=1&page_size=100",
+        {
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        }
+    );
+
+    if (booksResponse.ok) {
+
+        const data = await booksResponse.json();
+
+        const books = data.books || data;
+
+        bookSelect.innerHTML = `
+            <option value="">
+                Select Book
+            </option>
+        `;
+
+        books.forEach(book => {
+
+            bookSelect.innerHTML += `
+                <option value="${book.id}">
+                    ${book.title} - ${book.author}
+                </option>
+            `;
+
+        });
+    }
+}
+
+
+// ---------- ADMIN ISSUE BOOK ----------
+async function adminIssueBook() {
+
+    const token = localStorage.getItem("token");
+
+    const studentId =
+        document.getElementById("issueStudent").value;
+
+    const bookId =
+        document.getElementById("issueBook").value;
+
+    const dueDate =
+        document.getElementById("issueDueDate").value;
+
+
+    if (!studentId) {
+        alert("Please select a student.");
+        return;
+    }
+
+    if (!bookId) {
+        alert("Please select a book.");
+        return;
+    }
+
+    if (!dueDate) {
+        alert("Please select a due date.");
+        return;
+    }
+
+
+    // Convert date to datetime
+    const dueDateTime = dueDate + "T23:59:59";
+
+
+    const response = await fetch(
+        API + "/issue-book",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+
+            body: JSON.stringify({
+                book_id: parseInt(bookId),
+                user_id: parseInt(studentId),
+                due_date: dueDateTime
+            })
+        }
+    );
+
+
+    if (!response.ok) {
+
+        const error = await response.text();
+
+        console.log(error);
+
+        alert("Unable to issue book.");
+
+        return;
+    }
+
+
+    alert("Book issued successfully!");
+
+
+    // Close modal
+    const modalElement =
+        document.getElementById("issueBookModal");
+
+    const modal =
+        bootstrap.Modal.getInstance(modalElement);
+
+    if (modal) {
+        modal.hide();
+    }
+
+
+    // Reset form
+    document.getElementById("issueStudent").value = "";
+    document.getElementById("issueBook").value = "";
+    document.getElementById("issueDueDate").value = "";
+
+
+    // Refresh issued books
+    loadMyIssuedBooks();
+
+}

@@ -516,6 +516,35 @@ def delete_book(
 
 
 # ===========================
+# GET STUDENTS
+# ADMIN ONLY
+# ===========================
+
+@app.get(
+    "/students",
+    tags=["Users"]
+)
+def get_students(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin)
+):
+
+    students = db.query(
+        models.User
+    ).filter(
+        models.User.role == "student"
+    ).all()
+
+    return [
+        {
+            "id": student.id,
+            "name": student.name,
+            "email": student.email
+        }
+        for student in students
+    ]
+
+# ===========================
 # ISSUE BOOK
 # ADMIN ONLY
 # ===========================
