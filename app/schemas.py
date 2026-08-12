@@ -71,14 +71,14 @@ class IssuedBookCreate(BaseModel):
 
 
 class IssuedBookResponse(BaseModel):
-    id: int
 
+    id: int
     book_id: int
     user_id: int
 
     book_title: str
     author: str
-    student_name: str
+    student_name: str | None = None
 
     issue_date: datetime
     due_date: datetime

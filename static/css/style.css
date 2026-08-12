@@ -1,5 +1,13 @@
-/* Google Font */
+/* =========================================
+   GOOGLE FONT
+========================================= */
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+
+/* =========================================
+   GLOBAL
+========================================= */
 
 * {
     margin: 0;
@@ -13,11 +21,14 @@ body {
     color: #333;
 }
 
-/* Navbar */
+
+/* =========================================
+   NAVBAR
+========================================= */
 
 .navbar {
     padding: 15px 0;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .navbar-brand {
@@ -25,102 +36,149 @@ body {
     font-weight: 700;
 }
 
-/* Hero */
+
+/* =========================================
+   HOME HERO SECTION
+========================================= */
 
 .hero {
-    padding: 90px 0;
+    padding: 75px 0;
 }
 
 .hero h1 {
     font-size: 55px;
     font-weight: 700;
     color: #1d3557;
+    line-height: 1.15;
 }
 
 .hero p {
     font-size: 20px;
     color: #555;
     margin: 25px 0;
+    line-height: 1.7;
 }
 
+
+/* =========================================
+   HOME PAGE HERO IMAGE
+   Broad + Bigger
+========================================= */
+
 .hero-img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
     border-radius: 25px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, .20);
-    transition: .4s;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.20);
+    transition: 0.4s;
 }
 
 .hero-img:hover {
     transform: scale(1.03);
 }
 
-/* Buttons */
+
+/* =========================================
+   HOME PAGE LIBRARY IMAGE
+   Slightly Smaller
+========================================= */
+
+.library-img {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 25px;
+    box-shadow: 0 18px 35px rgba(0, 0, 0, 0.18);
+    transition: 0.4s;
+}
+
+.library-img:hover {
+    transform: scale(1.02);
+}
+
+
+/* =========================================
+   ABOUT PAGE IMAGE
+========================================= */
+
+.about-img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 25px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.20);
+    transition: 0.4s;
+}
+
+.about-img:hover {
+    transform: scale(1.03);
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
 
 .btn {
     border-radius: 40px;
     padding: 12px 28px;
     font-weight: 600;
-    transition: .3s;
+    transition: 0.3s;
 }
 
-.btn-primary:hover {
-    transform: translateY(-3px);
-}
-
-.btn-warning:hover {
-    transform: translateY(-3px);
-}
-
+.btn-primary:hover,
+.btn-warning:hover,
 .btn-success:hover {
     transform: translateY(-3px);
 }
 
-/* Cards */
+
+/* =========================================
+   FEATURE CARDS
+========================================= */
 
 .feature-card {
     border: none;
     border-radius: 22px;
-    transition: .35s;
+    transition: 0.35s;
     overflow: hidden;
     background: white;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, .08);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
 .feature-card:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .feature-card i {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
-/* Generic Cards */
+
+/* =========================================
+   GENERIC CARD
+========================================= */
 
 .card {
     border: none;
     border-radius: 22px;
 }
 
-/* Images */
+
+/* =========================================
+   IMAGES
+========================================= */
 
 img {
     max-width: 100%;
 }
 
-/* Footer */
 
-footer {
-    background: #0f172a;
-    color: white;
-    margin-top: 80px;
-    padding: 35px 0;
-}
-
-footer h5 {
-    font-weight: 600;
-}
-
-/* Forms */
+/* =========================================
+   FORMS
+========================================= */
 
 .form-control {
     border-radius: 12px;
@@ -128,10 +186,13 @@ footer h5 {
 }
 
 .form-control:focus {
-    box-shadow: 0 0 10px rgba(13, 110, 253, .25);
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.25);
 }
 
-/* Dashboard */
+
+/* =========================================
+   DASHBOARD
+========================================= */
 
 table {
     border-radius: 15px;
@@ -147,21 +208,206 @@ table {
     padding: 14px;
 }
 
-/* Responsive */
 
-@media(max-width:768px) {
+/* =========================================
+   COMPACT FOOTER
+========================================= */
+
+footer {
+    background: #0f172a;
+    color: white;
+    margin-top: 45px;
+    padding: 28px 0 12px;
+}
+
+footer h4,
+footer h5 {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+footer p {
+    line-height: 1.5;
+    margin-bottom: 6px;
+}
+
+
+/* =========================================
+   FOOTER LINKS
+========================================= */
+
+.footer-links {
+    margin: 0;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 5px;
+    transition: 0.3s;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.footer-links a:hover {
+    color: white;
+    padding-left: 6px;
+}
+
+
+/* =========================================
+   SOCIAL ICONS
+========================================= */
+
+footer .social-icons {
+    display: flex;
+    gap: 10px;
+}
+
+footer .social-icons a {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+
+    color: white;
+    font-size: 18px;
+
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+footer .social-icons a:hover {
+    background: #0d6efd;
+    color: white;
+    transform: translateY(-3px);
+}
+
+
+/* =========================================
+   FOOTER DIVIDER
+========================================= */
+
+footer hr {
+    opacity: 0.2;
+    margin: 20px 0 12px;
+}
+
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 992px) {
 
     .hero {
-        padding: 50px 0;
+        padding: 60px 0;
+    }
+
+    .hero h1 {
+        font-size: 45px;
+    }
+
+    .hero-img {
+        height: 360px;
+        margin-top: 30px;
+    }
+
+    .library-img {
+        height: 330px;
+    }
+
+    .about-img {
+        height: 380px;
+    }
+}
+
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .hero {
+        padding: 45px 0;
         text-align: center;
     }
 
     .hero h1 {
-        font-size: 36px;
+        font-size: 38px;
+    }
+
+    .hero p {
+        font-size: 17px;
     }
 
     .hero-img {
-        margin-top: 40px;
+        width: 100%;
+        height: 300px;
+        margin-top: 30px;
     }
 
+    .library-img {
+        height: 300px;
+        margin-bottom: 30px;
+    }
+
+    .about-img {
+        height: 350px;
+        margin-bottom: 30px;
+    }
+
+    footer {
+        text-align: center;
+        padding: 25px 0 10px;
+    }
+
+    footer .social-icons {
+        justify-content: center;
+    }
+}
+
+/* =========================================
+CONTACT PAGE IMAGE
+========================================= */
+
+.contact-img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+
+    border-radius: 22px;
+
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.18);
+
+    margin-top: 10px;
+}
+
+
+/* Mobile Contact Image */
+
+@media (max-width: 768px) {
+
+    .contact-img {
+        height: 240px;
+    }
+
+}
+
+.stat-clickable {
+    transition: all 0.25s ease;
+}
+
+.stat-clickable:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18) !important;
 }

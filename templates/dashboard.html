@@ -95,9 +95,9 @@
 
         <div class="row g-4 mb-4">
 
-            <div class="col-md-4" id="totalBooksCard">
+            <div class="col-md-4" id="totalBooksCard" onclick="openBooksCard()" style="cursor: pointer;">
 
-                <div class="card shadow border-0">
+                <div class="card shadow border-0 stat-clickable">
 
                     <div class="card-body text-center">
 
@@ -107,6 +107,10 @@
 
                         <h5>Total Books</h5>
 
+                        <small class="text-muted">
+                            Click to view books
+                        </small>
+
                     </div>
 
                 </div>
@@ -114,9 +118,9 @@
             </div>
 
 
-            <div class="col-md-4" id="totalUsersCard">
+            <div class="col-md-4" id="totalUsersCard" onclick="openUsersCard()" style="cursor: pointer;">
 
-                <div class="card shadow border-0">
+                <div class="card shadow border-0 stat-clickable">
 
                     <div class="card-body text-center">
 
@@ -126,6 +130,10 @@
 
                         <h5>Total Users</h5>
 
+                        <small class="text-muted">
+                            Click to view users
+                        </small>
+
                     </div>
 
                 </div>
@@ -133,9 +141,9 @@
             </div>
 
 
-            <div class="col-md-4" id="totalContactsCard">
+            <div class="col-md-4" id="totalContactsCard" onclick="openContactsCard()" style="cursor: pointer;">
 
-                <div class="card shadow border-0">
+                <div class="card shadow border-0 stat-clickable">
 
                     <div class="card-body text-center">
 
@@ -144,6 +152,10 @@
                         </h1>
 
                         <h5>Contact Messages</h5>
+
+                        <small class="text-muted">
+                            Click to view messages
+                        </small>
 
                     </div>
 
@@ -185,8 +197,8 @@
         </div>
 
 
+        <div id="booksSection" class="d-flex justify-content-between align-items-center mb-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
 
             <h2 class="fw-bold">
 
@@ -198,6 +210,10 @@
 
                 ➕ Add Book
 
+            </button>
+            <button id="issueBookBtn" class="btn btn-primary ms-2" data-bs-toggle="modal"
+                data-bs-target="#issueBookModal">
+                📖 Issue Book
             </button>
 
         </div>
@@ -235,7 +251,6 @@
 
                     <tr>
 
-                        <th>ID</th>
                         <th>Title</th>
                         <th>Author</th>
                         <th>Genre</th>
@@ -307,6 +322,95 @@
                 </tbody>
 
             </table>
+            <div class="table-responsive">
+
+                <table class="table table-hover">
+
+                    <thead id="issuedBookHead">
+                    </thead>
+
+                    <tbody id="issuedBookTable">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div id="issuedPagination" class="d-flex justify-content-center align-items-center mt-4">
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Issue Book Modal -->
+    <div class="modal fade" id="issueBookModal" tabindex="-1">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        📖 Issue Book to Student
+                    </h5>
+
+                    <button class="btn-close" data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <label class="form-label">
+                        Select Student
+                    </label>
+
+                    <select id="issueStudent" class="form-select mb-3">
+
+                        <option value="">
+                            Select Student
+                        </option>
+
+                    </select>
+
+
+                    <label class="form-label">
+                        Select Book
+                    </label>
+
+                    <select id="issueBook" class="form-select mb-3">
+
+                        <option value="">
+                            Select Book
+                        </option>
+
+                    </select>
+
+
+                    <label class="form-label">
+                        Due Date
+                    </label>
+
+                    <input type="date" id="issueDueDate" class="form-control">
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button class="btn btn-primary" onclick="adminIssueBook()">
+                        📖 Issue Book
+                    </button>
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -473,9 +577,142 @@
 
             loadMyIssuedBooks();
 
-        }
+            loadIssueBookData();
+
+        };
 
     </script>
+    <!-- =========================
+     USERS MODAL
+========================= -->
+
+    <div class="modal fade" id="usersModal" tabindex="-1">
+
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        👥 Registered Users
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover">
+
+                            <thead class="table-success">
+
+                                <tr>
+
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="usersModalTable">
+
+                                <tr>
+
+                                    <td colspan="4" class="text-center">
+                                        Click the card to load users.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+     CONTACTS MODAL
+========================= -->
+
+    <div class="modal fade" id="contactsModal" tabindex="-1">
+
+        <div class="modal-dialog modal-xl">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        ✉️ Contact Messages
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover">
+
+                            <thead class="table-danger">
+
+                                <tr>
+
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Subject</th>
+                                    <th>Message</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="contactsModalTable">
+
+                                <tr>
+
+                                    <td colspan="5" class="text-center">
+                                        Click the card to load messages.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </body>
 

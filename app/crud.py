@@ -45,8 +45,29 @@ def authenticate_user(db: Session, email: str, password: str):
 # BOOK CRUD
 # ==========================
 
+from fastapi import HTTPException
+
 def create_book(db: Session, book: schemas.BookCreate):
-    db_book = models.Book(**book.model_dump())
+
+    # Check duplicate book with same title and author
+    existing_book = db.query(models.Book).filter(
+        models.Book.title.ilike(book.title.strip()),
+        models.Book.author.ilike(book.author.strip())
+    ).first()
+
+    if existing_book:
+        raise HTTPException(
+            status_code=400,
+            detail="This book by the same author already exists"
+        )
+
+    db_book = models.Book(
+        title=book.title.strip(),
+        author=book.author.strip(),
+        genre=book.genre,
+        price=book.price,
+        published_year=book.published_year
+    )
 
     db.add(db_book)
     db.commit()
@@ -180,69 +201,96 @@ def issue_book(
     db: Session,
     issued_book: schemas.IssuedBookCreate
 ):
-
     issue_date = datetime.utcnow()
 
-    # Due date must be after issue date
     if issued_book.due_date <= issue_date:
         raise ValueError("Due date must be after issue date")
 
-    # Get book details
-    book = db.query(
-        models.Book
-    ).filter(
+    book = db.query(models.Book).filter(
         models.Book.id == issued_book.book_id
     ).first()
 
     if not book:
-        return None
+        raise ValueError("Book not found")
 
-    db_issued_book = models.IssuedBook(
+    user = db.query(models.User).filter(
+        models.User.id == issued_book.user_id
+    ).first()
+
+    if not user:
+        raise ValueError("Student not found")
+
+    existing_issue = db.query(models.IssuedBook).filter(
+        models.IssuedBook.book_id == issued_book.book_id,
+        models.IssuedBook.status == "issued"
+    ).first()
+
+    if existing_issue:
+        raise ValueError("Book is already issued")
+
+    new_issue = models.IssuedBook(
         book_id=issued_book.book_id,
         user_id=issued_book.user_id,
-        due_date=issued_book.due_date,
         issue_date=issue_date,
+        due_date=issued_book.due_date,
         fine=0.0,
         status="issued"
     )
 
-    db.add(db_issued_book)
+    db.add(new_issue)
     db.commit()
-    db.refresh(db_issued_book)
+    db.refresh(new_issue)
 
-    # Add book information for response
-    db_issued_book.book_title = book.title
-    db_issued_book.author = book.author
+    return {
+        "id": new_issue.id,
+        "book_id": new_issue.book_id,
+        "user_id": new_issue.user_id,
+        "book_title": book.title,
+        "author": book.author,
+        "student_name": user.username,
+        "issue_date": new_issue.issue_date,
+        "due_date": new_issue.due_date,
+        "return_date": new_issue.return_date,
+        "fine": new_issue.fine,
+        "status": new_issue.status
+    }
 
-    return db_issued_book
-
+from datetime import datetime
 
 def get_issued_books(db: Session):
 
-    results = db.query(
-        models.IssuedBook,
-        models.Book.title,
-        models.Book.author,
-        models.User.username
-    ).join(
-        models.Book,
-        models.IssuedBook.book_id == models.Book.id
-    ).join(
-        models.User,
-        models.IssuedBook.user_id == models.User.id
-    ).order_by(
-        models.IssuedBook.issue_date.desc()
-    ).all()
+    results = (
+        db.query(
+            models.IssuedBook,
+            models.Book.title.label("book_title"),
+            models.Book.author.label("author"),
+            models.User.username.label("student_name")
+        )
+        .join(
+            models.Book,
+            models.IssuedBook.book_id == models.Book.id
+        )
+        .join(
+            models.User,
+            models.IssuedBook.user_id == models.User.id
+        )
+        .order_by(
+            models.IssuedBook.issue_date.desc()
+        )
+        .all()
+    )
 
     issued_books = []
 
     now = datetime.utcnow()
 
-    for issued_book, title, author, username in results:
+    for issued_book, book_title, author, student_name in results:
 
-        # Calculate current fine for overdue books
+        fine = issued_book.fine or 0.0
+
         if (
             issued_book.status == "issued"
+            and issued_book.due_date
             and now > issued_book.due_date
         ):
 
@@ -250,31 +298,34 @@ def get_issued_books(db: Session):
                 now - issued_book.due_date
             ).total_seconds()
 
-            late_days = int(
-                late_seconds // (24 * 60 * 60)
+            late_days = max(
+                0,
+                int(late_seconds // 86400)
             )
 
-            issued_book.fine = late_days * 10
+            fine = late_days * 10
 
-        # Currently issued but not overdue
+            issued_book.fine = fine
+
         elif issued_book.status == "issued":
 
-            issued_book.fine = 0.0
+            fine = 0.0
+            issued_book.fine = fine
 
         issued_books.append({
             "id": issued_book.id,
             "book_id": issued_book.book_id,
             "user_id": issued_book.user_id,
 
-            "book_title": title,
+            "book_title": book_title,
             "author": author,
-            "student_name": username,
+            "student_name": student_name,
 
             "issue_date": issued_book.issue_date,
             "due_date": issued_book.due_date,
             "return_date": issued_book.return_date,
 
-            "fine": issued_book.fine,
+            "fine": fine,
             "status": issued_book.status
         })
 

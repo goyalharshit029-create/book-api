@@ -20,6 +20,8 @@ from app.database import engine, SessionLocal, Base
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 
+from datetime import datetime
+
 
 # ===========================
 # CREATE TABLES
@@ -514,7 +516,6 @@ def delete_book(
         "message": "Book deleted successfully"
     }
 
-
 # ===========================
 # GET STUDENTS
 # ADMIN ONLY
@@ -526,7 +527,7 @@ def delete_book(
 )
 def get_students(
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
+    current_user=Depends(get_current_admin)
 ):
 
     students = db.query(
@@ -538,10 +539,38 @@ def get_students(
     return [
         {
             "id": student.id,
-            "name": student.name,
+            "name": student.username,
             "email": student.email
         }
         for student in students
+    ]
+
+# ===========================
+# GET ALL USERS
+# ADMIN ONLY
+# ===========================
+
+@app.get(
+    "/users",
+    tags=["Users"]
+)
+def get_users(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin)
+):
+
+    users = db.query(
+        models.User
+    ).all()
+
+    return [
+        {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role
+        }
+        for user in users
     ]
 
 # ===========================
@@ -557,64 +586,81 @@ def get_students(
 def issue_book(
     issued_book: schemas.IssuedBookCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
+    current_user=Depends(get_current_admin)
 ):
 
-    # Check book exists
-    book = crud.get_book(
-        db,
-        issued_book.book_id
-    )
+    # Check book
+    book = db.query(models.Book).filter(
+        models.Book.id == issued_book.book_id
+    ).first()
 
     if not book:
-
         raise HTTPException(
             status_code=404,
             detail="Book not found"
         )
 
-    # Check user exists
-    user = db.query(
-        models.User
-    ).filter(
+    # Check student
+    user = db.query(models.User).filter(
         models.User.id == issued_book.user_id
     ).first()
 
     if not user:
-
         raise HTTPException(
             status_code=404,
-            detail="User not found"
+            detail="Student not found"
         )
 
-    # Check if book is already issued
-    existing_issue = db.query(
-        models.IssuedBook
-    ).filter(
+    # Check if already issued
+    existing_issue = db.query(models.IssuedBook).filter(
         models.IssuedBook.book_id == issued_book.book_id,
         models.IssuedBook.status == "issued"
     ).first()
 
     if existing_issue:
-
         raise HTTPException(
             status_code=400,
             detail="Book is already issued"
         )
 
-    try:
+    # Due date validation
+    issue_date = datetime.utcnow()
 
-        return crud.issue_book(
-            db,
-            issued_book
-        )
-
-    except ValueError as e:
-
+    if issued_book.due_date <= issue_date:
         raise HTTPException(
             status_code=400,
-            detail=str(e)
+            detail="Due date must be after issue date"
         )
+
+    # Create record DIRECTLY
+    new_issue = models.IssuedBook(
+        book_id=issued_book.book_id,
+        user_id=issued_book.user_id,
+        issue_date=issue_date,
+        due_date=issued_book.due_date,
+        return_date=None,
+        fine=0.0,
+        status="issued"
+    )
+
+    db.add(new_issue)
+    db.commit()
+    db.refresh(new_issue)
+
+    # Return exactly what the response schema requires
+    return {
+        "id": new_issue.id,
+        "book_id": new_issue.book_id,
+        "user_id": new_issue.user_id,
+        "book_title": book.title,
+        "author": book.author,
+        "student_name": user.username,
+        "issue_date": new_issue.issue_date,
+        "due_date": new_issue.due_date,
+        "return_date": new_issue.return_date,
+        "fine": new_issue.fine,
+        "status": new_issue.status
+    }
 
 
 # ===========================
@@ -624,15 +670,50 @@ def issue_book(
 
 @app.get(
     "/issued-books",
-    response_model=list[schemas.IssuedBookResponse],
     tags=["Library"]
 )
 def get_issued_books(
+    page: int = 1,
+    page_size: int = 10,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
+    current_user=Depends(get_current_admin)
 ):
 
-    return crud.get_issued_books(db)
+    if page < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Page must be greater than 0"
+        )
+
+    if page_size < 1 or page_size > 100:
+        raise HTTPException(
+            status_code=400,
+            detail="Page size must be between 1 and 100"
+        )
+
+    # Get all issued book records
+    all_books = crud.get_issued_books(db)
+
+    total = len(all_books)
+
+    total_pages = (
+        (total + page_size - 1) // page_size
+        if total > 0
+        else 0
+    )
+
+    start = (page - 1) * page_size
+    end = start + page_size
+
+    books = all_books[start:end]
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages,
+        "books": books
+    }
 
 
 # ===========================
@@ -642,15 +723,27 @@ def get_issued_books(
 
 @app.get(
     "/my-issued-books",
-    response_model=list[schemas.IssuedBookResponse],
     tags=["Library"]
 )
 def get_my_issued_books(
+    page: int = 1,
+    page_size: int = 10,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
 
-    # Find logged-in user
+    if page < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Page must be greater than 0"
+        )
+
+    if page_size < 1 or page_size > 100:
+        raise HTTPException(
+            status_code=400,
+            detail="Page size must be between 1 and 100"
+        )
+
     user = db.query(
         models.User
     ).filter(
@@ -664,10 +757,32 @@ def get_my_issued_books(
             detail="User not found"
         )
 
-    return crud.get_user_issued_books(
+    # Get only this student's issued books
+    all_books = crud.get_user_issued_books(
         db,
         user.id
     )
+
+    total = len(all_books)
+
+    total_pages = (
+        (total + page_size - 1) // page_size
+        if total > 0
+        else 0
+    )
+
+    start = (page - 1) * page_size
+    end = start + page_size
+
+    books = all_books[start:end]
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages,
+        "books": books
+    }
 
 
 # ===========================
@@ -677,18 +792,21 @@ def get_my_issued_books(
 
 @app.put(
     "/return-book/{issued_book_id}",
-    response_model=schemas.IssuedBookResponse,
+    response_model=None,
     tags=["Library"]
 )
 def return_book(
     issued_book_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
+    current_user=Depends(get_current_admin)
 ):
 
-    issued_book = crud.return_book(
-        db,
-        issued_book_id
+    issued_book = (
+        db.query(models.IssuedBook)
+        .filter(
+            models.IssuedBook.id == issued_book_id
+        )
+        .first()
     )
 
     if not issued_book:
@@ -698,4 +816,50 @@ def return_book(
             detail="Issued book record not found"
         )
 
-    return issued_book
+    # Prevent returning an already returned book
+    if issued_book.status == "returned":
+
+        raise HTTPException(
+            status_code=400,
+            detail="This book has already been returned"
+        )
+
+    # Update issued book
+    issued_book.status = "returned"
+
+    issued_book.return_date = datetime.utcnow()
+
+    # Optional: calculate fine
+    fine = 0.0
+
+    if (
+        issued_book.due_date
+        and issued_book.return_date > issued_book.due_date
+    ):
+
+        overdue_days = (
+            issued_book.return_date.date()
+            - issued_book.due_date.date()
+        ).days
+
+        # ₹10 fine per overdue day
+        fine = overdue_days * 10
+
+    issued_book.fine = fine
+
+    db.commit()
+
+    db.refresh(issued_book)
+
+    # IMPORTANT:
+    # Return only a normal dictionary.
+    # Do NOT return issued_book directly.
+    return {
+        "message": "Book returned successfully",
+        "id": issued_book.id,
+        "book_id": issued_book.book_id,
+        "user_id": issued_book.user_id,
+        "status": issued_book.status,
+        "return_date": issued_book.return_date,
+        "fine": issued_book.fine
+    }
