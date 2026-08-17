@@ -199,22 +199,28 @@
 
         <div id="booksSection" class="d-flex justify-content-between align-items-center mb-4">
 
-
-            <h2 class="fw-bold">
-
+            <h2 class="fw-bold mb-0">
                 Book Dashboard
-
             </h2>
 
-            <button id="addBookBtn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBookModal">
+            <!-- ADMIN ACTION BUTTONS -->
 
-                ➕ Add Book
+            <div id="bookActionButtons" class="d-flex align-items-center gap-2">
 
-            </button>
-            <button id="issueBookBtn" class="btn btn-primary ms-2" data-bs-toggle="modal"
-                data-bs-target="#issueBookModal">
-                📖 Issue Book
-            </button>
+                <button id="addBookBtn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBookModal">
+
+                    ➕ Add Book
+
+                </button>
+
+                <button id="issueBookBtn" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#issueBookModal">
+
+                    📖 Issue Book
+
+                </button>
+
+            </div>
 
         </div>
 
@@ -322,20 +328,6 @@
                 </tbody>
 
             </table>
-            <div class="table-responsive">
-
-                <table class="table table-hover">
-
-                    <thead id="issuedBookHead">
-                    </thead>
-
-                    <tbody id="issuedBookTable">
-                    </tbody>
-
-                </table>
-
-            </div>
-
 
             <div id="issuedPagination" class="d-flex justify-content-center align-items-center mt-4">
             </div>
@@ -588,7 +580,7 @@
 
     <div class="modal fade" id="usersModal" tabindex="-1">
 
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
 
             <div class="modal-content">
 
@@ -598,18 +590,19 @@
                         👥 Registered Users
                     </h5>
 
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                    </button>
 
                 </div>
 
 
-                <div class="modal-body">
+                <div class="modal-body users-modal-body">
 
-                    <div class="table-responsive">
+                    <div class="table-responsive users-table-container">
 
-                        <table class="table table-hover">
+                        <table class="table table-hover align-middle mb-0">
 
-                            <thead class="table-success">
+                            <thead class="table-success sticky-top">
 
                                 <tr>
 
@@ -627,8 +620,10 @@
 
                                 <tr>
 
-                                    <td colspan="4" class="text-center">
+                                    <td colspan="4" class="text-center text-muted py-4">
+
                                         Click the card to load users.
+
                                     </td>
 
                                 </tr>

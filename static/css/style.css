@@ -411,3 +411,152 @@ CONTACT PAGE IMAGE
     transform: translateY(-6px);
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18) !important;
 }
+
+/* =========================================
+   USERS MODAL - INTERNAL SCROLL
+========================================= */
+
+.users-modal-body {
+    padding: 0;
+}
+
+.users-table-container {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.users-table-container thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* =========================================
+   PROFESSIONAL TOAST NOTIFICATIONS
+========================================= */
+
+#toastContainer {
+    z-index: 9999;
+}
+
+.custom-toast {
+    width: 360px;
+    min-height: 70px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin-bottom: 12px;
+    padding: 15px 18px;
+
+    background: white;
+    border-radius: 16px;
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+
+    border-left: 5px solid #198754;
+
+    animation: toastSlideIn 0.35s ease forwards;
+}
+
+.custom-toast.success {
+    border-left-color: #198754;
+}
+
+.custom-toast.error {
+    border-left-color: #dc3545;
+}
+
+.custom-toast.warning {
+    border-left-color: #ffc107;
+}
+
+.custom-toast.info {
+    border-left-color: #0d6efd;
+}
+
+.toast-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.success .toast-icon {
+    color: #198754;
+}
+
+.error .toast-icon {
+    color: #dc3545;
+}
+
+.warning .toast-icon {
+    color: #ffc107;
+}
+
+.info .toast-icon {
+    color: #0d6efd;
+}
+
+.toast-message {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4;
+}
+
+.toast-close {
+    border: none;
+    background: transparent;
+    color: #777;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.toast-close:hover {
+    color: #000;
+}
+
+@keyframes toastSlideIn {
+
+    from {
+        opacity: 0;
+        transform: translateX(120%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+}
+
+.hide-toast {
+
+    animation: toastSlideOut 0.3s ease forwards;
+
+}
+
+@keyframes toastSlideOut {
+
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(120%);
+    }
+
+}
+
+@media (max-width: 576px) {
+
+    .custom-toast {
+        width: calc(100vw - 30px);
+    }
+
+}

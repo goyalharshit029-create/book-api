@@ -1,5 +1,84 @@
 const API = "";
 
+// ======================================
+// PROFESSIONAL TOAST NOTIFICATIONS
+// ======================================
+
+function showToast(message, type = "success") {
+
+    const icons = {
+        success: "bi-check-circle-fill",
+        error: "bi-x-circle-fill",
+        warning: "bi-exclamation-triangle-fill",
+        info: "bi-info-circle-fill"
+    };
+
+    let container =
+        document.getElementById("toastContainer");
+
+    if (!container) {
+
+        container = document.createElement("div");
+
+        container.id = "toastContainer";
+
+        container.className =
+            "toast-container position-fixed top-0 end-0 p-3";
+
+        document.body.appendChild(container);
+
+    }
+
+    const toastId =
+        "toast-" + Date.now();
+
+    const toast = document.createElement("div");
+
+    toast.id = toastId;
+
+    toast.className =
+        `custom-toast ${type}`;
+
+    toast.innerHTML = `
+
+        <div class="toast-icon">
+            <i class="bi ${icons[type]}"></i>
+        </div>
+
+        <div class="toast-message">
+            ${message}
+        </div>
+
+        <button
+            type="button"
+            class="toast-close"
+            aria-label="Close">
+
+            <i class="bi bi-x-lg"></i>
+
+        </button>
+    `;
+
+    container.appendChild(toast);
+
+    const removeToast = () => {
+
+        toast.classList.add("hide-toast");
+
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+
+    };
+
+    toast
+        .querySelector(".toast-close")
+        .addEventListener("click", removeToast);
+
+    setTimeout(removeToast, 3500);
+
+}
+
 let currentPage = 1;
 let pageSize = 10;
 let totalPages = 1;
@@ -19,7 +98,7 @@ function checkAuth() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-            alert("Please login first.");
+            showToast("Please login first.", "warning");
             window.location.href = "/login-page";
         }
     }
@@ -38,7 +117,7 @@ async function registerUser() {
     const password = document.getElementById("password")?.value.trim();
 
     if (!username || !email || !password) {
-        alert("Please fill all fields.");
+        showToast("Please fill all fields.", "warning");
         return;
     }
 
@@ -58,15 +137,15 @@ async function registerUser() {
         const data = await response.json();
 
         if (response.ok) {
-            alert("Registration Successful!");
+            showToast("Registration successful!", "success");
             window.location.href = "/login-page";
         } else {
-            alert(data.detail || "Registration Failed");
+            showToast(data.detail || "Registration failed.", "error");
         }
 
     } catch (error) {
         console.error("Registration error:", error);
-        alert("Something went wrong during registration.");
+        showToast("Something went wrong during registration.", "error");
     }
 }
 
@@ -80,7 +159,7 @@ async function loginUser() {
     const password = document.getElementById("password")?.value.trim();
 
     if (!email || !password) {
-        alert("Please enter Email and Password.");
+        showToast("Please enter Email and Password.", "warning");
         return;
     }
 
@@ -106,16 +185,16 @@ async function loginUser() {
 
             console.log("Logged in role:", data.role);
 
-            alert("Login Successful!");
+            showToast("Login successful!", "success");
             window.location.href = "/dashboard";
 
         } else {
-            alert(data.detail || "Invalid Credentials");
+            showToast(data.detail || "Invalid credentials.", "error");
         }
 
     } catch (error) {
         console.error("Login error:", error);
-        alert("Something went wrong while logging in.");
+        showToast("Something went wrong while logging in.", "error");
     }
 }
 
@@ -245,7 +324,7 @@ async function loadBooks(page = 1) {
 
     } catch (error) {
         console.error("Load books error:", error);
-        alert("Unable to load books.");
+        showToast("Unable to load books.", "error");
     }
 }
 
@@ -412,7 +491,7 @@ async function addBook() {
         Number.isNaN(price) ||
         Number.isNaN(published_year)
     ) {
-        alert("Please fill all fields correctly.");
+        showToast("Please fill all fields correctly.", "warning");
         return;
     }
 
@@ -446,10 +525,11 @@ async function addBook() {
         const data = await response.json();
 
         if (response.ok) {
-            alert(
+            showToast(
                 isEditing
-                    ? "Book Updated Successfully!"
-                    : "Book Added Successfully!"
+                    ? "Book updated successfully!"
+                    : "Book added successfully!",
+                "success"
             );
 
             document.getElementById("title").value = "";
@@ -481,12 +561,12 @@ async function addBook() {
             }
 
         } else {
-            alert(data.detail || "Operation Failed.");
+            showToast(data.detail || "Operation failed.", "error");
         }
 
     } catch (error) {
         console.error("Add/Update book error:", error);
-        alert("Something went wrong.");
+        showToast("Something went wrong.", "error");
     }
 
     await loadBooks(currentPage);
@@ -519,7 +599,7 @@ async function deleteBook(id) {
         );
 
         if (response.ok) {
-            alert("Book Deleted Successfully!");
+            showToast("Book deleted successfully!", "success");
 
             if (
                 currentPage > 1 &&
@@ -533,12 +613,12 @@ async function deleteBook(id) {
         } else {
             const data = await response.json();
 
-            alert(data.detail || "Delete Failed");
+            showToast(data.detail || "Delete failed.", "error");
         }
 
     } catch (error) {
         console.error("Delete book error:", error);
-        alert("Something went wrong.");
+        showToast("Something went wrong.", "error");
     }
 
     await loadBooks(currentPage);
@@ -564,7 +644,7 @@ async function editBook(id) {
         );
 
         if (!response.ok) {
-            alert("Unable to fetch book details.");
+            showToast("Unable to fetch book details.", "error");
             return;
         }
 
@@ -596,7 +676,7 @@ async function editBook(id) {
 
     } catch (error) {
         console.error("Edit book error:", error);
-        alert("Something went wrong.");
+        showToast("Something went wrong.", "error");
     }
 }
 
@@ -619,7 +699,7 @@ async function sendContact() {
         document.getElementById("contactMessage")?.value.trim();
 
     if (!name || !email || !subject || !message) {
-        alert("Please fill all fields.");
+        showToast("Please fill all fields.", "warning");
         return;
     }
 
@@ -645,7 +725,7 @@ async function sendContact() {
         const data = await response.json();
 
         if (response.ok) {
-            alert("Message Sent Successfully!");
+            showToast("Message sent successfully!", "success");
 
             document.getElementById("contactName").value = "";
             document.getElementById("contactEmail").value = "";
@@ -657,12 +737,12 @@ async function sendContact() {
             }
 
         } else {
-            alert(data.detail || "Failed to send message.");
+            showToast(data.detail || "Failed to send message.", "error");
         }
 
     } catch (error) {
         console.error("Contact error:", error);
-        alert("Something went wrong.");
+        showToast("Something went wrong.", "error");
     }
 }
 
@@ -1119,16 +1199,11 @@ async function returnBook(issuedBookId) {
         }
 
         if (!response.ok) {
-            alert(
-                data.detail ||
-                "Failed to return book"
-            );
+            showToast(data.detail || "Failed to return book.", "error");
             return;
         }
 
-        alert(
-            "Book returned successfully!"
-        );
+        showToast("Book returned successfully!", "success");
 
         await loadMyIssuedBooks(1);
 
@@ -1146,9 +1221,7 @@ async function returnBook(issuedBookId) {
             error
         );
 
-        alert(
-            "Something went wrong while returning the book."
-        );
+        showToast("Something went wrong while returning the book.", "error");
     }
 }
 
@@ -1306,6 +1379,7 @@ window.loadIssueBookData = async function () {
 // ======================================
 
 async function adminIssueBook() {
+
     const token =
         localStorage.getItem("token");
 
@@ -1324,25 +1398,42 @@ async function adminIssueBook() {
             "issueDueDate"
         )?.value;
 
+
+    // ======================================
+    // VALIDATION
+    // ======================================
+
     if (!studentId) {
-        alert("Please select a student.");
+        showToast(
+            "Please select a student.",
+            "warning"
+        );
         return;
     }
 
     if (!bookId) {
-        alert("Please select a book.");
+        showToast(
+            "Please select a book.",
+            "warning"
+        );
         return;
     }
 
     if (!dueDate) {
-        alert("Please select a due date.");
+        showToast(
+            "Please select a due date.",
+            "warning"
+        );
         return;
     }
+
 
     const dueDateTime =
         dueDate + "T23:59:59";
 
+
     try {
+
         const response = await fetch(
             API + "/issue-book",
             {
@@ -1364,11 +1455,18 @@ async function adminIssueBook() {
             }
         );
 
+
+        // ======================================
+        // HANDLE API ERROR
+        // ======================================
+
         if (!response.ok) {
+
             let errorMessage =
                 "Unable to issue book.";
 
             try {
+
                 const errorData =
                     await response.json();
 
@@ -1377,16 +1475,33 @@ async function adminIssueBook() {
                     errorMessage;
 
             } catch {
+
                 // Ignore JSON parsing error
+
             }
 
-            alert(errorMessage);
+            showToast(
+                errorMessage,
+                "error"
+            );
+
             return;
         }
 
-        alert(
-            "Book issued successfully!"
+
+        // ======================================
+        // SUCCESS
+        // ======================================
+
+        showToast(
+            "Book issued successfully!",
+            "success"
         );
+
+
+        // ======================================
+        // CLOSE MODAL
+        // ======================================
 
         const modalElement =
             document.getElementById(
@@ -1402,6 +1517,11 @@ async function adminIssueBook() {
             modal.hide();
         }
 
+
+        // ======================================
+        // RESET FORM
+        // ======================================
+
         document.getElementById(
             "issueStudent"
         ).value = "";
@@ -1414,23 +1534,35 @@ async function adminIssueBook() {
             "issueDueDate"
         ).value = "";
 
+
+        // ======================================
+        // REFRESH DATA
+        // ======================================
+
         await loadMyIssuedBooks(1);
 
         if (typeof loadStats === "function") {
             await loadStats();
         }
 
-    } catch (error) {
+    }
+
+    catch (error) {
+
         console.error(
             "Issue book error:",
             error
         );
 
-        alert(
-            "Something went wrong while issuing the book."
+        showToast(
+            "Something went wrong while issuing the book.",
+            "error"
         );
+
     }
+
 }
+
 
 
 // ======================================
@@ -1702,8 +1834,9 @@ async function openUsersCard() {
             error
         );
 
-        alert(
-            "Failed to load users."
+        showToast(
+            "Failed to load users.",
+            "error"
         );
 
     }
@@ -1839,8 +1972,9 @@ async function openContactsCard() {
             error
         );
 
-        alert(
-            "Failed to load contact messages."
+        showToast(
+            "Failed to load contact messages.",
+            "error"
         );
 
     }
