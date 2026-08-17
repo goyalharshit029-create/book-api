@@ -196,6 +196,39 @@
 
         </div>
 
+        <!-- ==========================
+             BOOK RECOMMENDATIONS
+        =========================== -->
+
+        <div id="recommendationsSection" class="mb-5 d-none">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+
+                    <h2 class="fw-bold mb-1">
+                        🤖 Recommended for You
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Personalized recommendations based on your book history
+                    </p>
+
+                </div>
+
+                <button class="btn btn-outline-primary" onclick="loadRecommendations()">
+                    🔄 Refresh
+                </button>
+
+            </div>
+
+
+            <div class="row g-4" id="recommendationsContainer">
+
+            </div>
+
+        </div>
+
 
         <div id="booksSection" class="d-flex justify-content-between align-items-center mb-4">
 
@@ -568,6 +601,8 @@
             loadBooks();
 
             loadMyIssuedBooks();
+
+            loadRecommendations();
 
             loadIssueBookData();
 

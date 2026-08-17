@@ -8,6 +8,8 @@ from sqlalchemy import inspect
 
 from app import models, schemas, crud
 
+from app.services.recommendation_service import get_recommendations
+
 from app.auth import (
     create_access_token,
     get_current_user,
@@ -782,6 +784,30 @@ def get_my_issued_books(
         "page_size": page_size,
         "total_pages": total_pages,
         "books": books
+    }
+
+# ===========================
+# BOOK RECOMMENDATIONS
+# STUDENT ONLY
+# ===========================
+
+@app.get(
+    "/recommendations",
+    tags=["Recommendations"]
+)
+def get_book_recommendations(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_student)
+):
+
+    recommendations = get_recommendations(
+        db=db,
+        user_id=current_user.id,
+        top_n=5
+    )
+
+    return {
+        "recommendations": recommendations
     }
 
 

@@ -1564,6 +1564,203 @@ async function adminIssueBook() {
 }
 
 
+// ======================================
+// LOAD BOOK RECOMMENDATIONS
+// ======================================
+
+async function loadRecommendations() {
+
+    const token =
+        localStorage.getItem("token");
+
+    const role =
+        localStorage.getItem("role");
+
+    const section =
+        document.getElementById(
+            "recommendationsSection"
+        );
+
+    const container =
+        document.getElementById(
+            "recommendationsContainer"
+        );
+
+
+    // ======================================
+    // STUDENT ONLY
+    // ======================================
+
+    if (role !== "student") {
+
+        if (section) {
+            section.classList.add("d-none");
+        }
+
+        return;
+    }
+
+
+    if (section) {
+        section.classList.remove("d-none");
+    }
+
+
+    try {
+
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                Loading recommendations...
+            </div>
+        `;
+
+
+        const response = await fetch(
+            API + "/recommendations",
+            {
+                headers: {
+                    Authorization:
+                        "Bearer " + token
+                }
+            }
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load recommendations."
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const recommendations =
+            data.recommendations || [];
+
+
+        // ======================================
+        // NO RECOMMENDATIONS
+        // ======================================
+
+        if (recommendations.length === 0) {
+
+            container.innerHTML = `
+                <div class="col-12">
+
+                    <div class="alert alert-info text-center">
+
+                        📚 No recommendations available yet.
+                        Issue some books to get personalized recommendations!
+
+                    </div>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        // ======================================
+        // DISPLAY RECOMMENDATIONS
+        // ======================================
+
+        container.innerHTML =
+            recommendations.map(
+                book => `
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="card shadow-sm border-0 h-100">
+
+                        <div class="card-body d-flex flex-column">
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+
+                                <span class="fs-3">
+                                    📚
+                                </span>
+
+                                <span class="badge bg-primary">
+
+                                    ${book.similarity_score}% Match
+
+                                </span>
+
+                            </div>
+
+
+                            <h5 class="card-title fw-bold">
+
+                                ${book.title}
+
+                            </h5>
+
+
+                            <p class="text-muted mb-2">
+
+                                ✍️ ${book.author}
+
+                            </p>
+
+
+                            <div class="mt-auto">
+
+                                <span class="badge bg-secondary me-2">
+
+                                    ${book.genre || "General"}
+
+                                </span>
+
+
+                                <span class="text-success fw-bold">
+
+                                    ₹${book.price || "N/A"}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `
+            ).join("");
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Recommendation error:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="col-12">
+
+                <div class="alert alert-danger text-center">
+
+                    Failed to load recommendations.
+
+                </div>
+
+            </div>
+        `;
+
+    }
+
+}
+
+
 
 // ======================================
 // INITIALIZE DASHBOARD
